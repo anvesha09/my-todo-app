@@ -1,0 +1,44 @@
+services:
+  todo-frontend:
+    container_name: todo-frontend
+    build: ./frontend
+    ports:
+      - "3000:80"  # Changed to port 3000 for standard React dev
+    networks:
+      - todo-app
+    environment:
+      - BACKEND_SERVER=${BACKEND_SERVER}
+    depends_on:
+      - todo-backend
+
+  todo-backend:
+    container_name: todo-backend
+    build: ./backend
+    ports:
+      - "3001:3001" # It now matches the frontend's request
+    networks:
+      - todo-app
+    environment:
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+    depends_on:
+      - todo-database # Added dependency on the database
+
+  todo-database:
+    container_name: todo-database
+    image: mysql:5.7
+    networks:
+      - todo-app
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+    volumes:
+      - todo-mysql-data:/var/lib/mysql
+
+networks:
+  todo-app:
+
+volumes:
+  todo-mysql-data:

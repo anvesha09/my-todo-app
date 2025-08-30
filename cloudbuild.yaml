@@ -1,8 +1,13 @@
 steps:
+# STEP 0: List all files recursively to debug the project structure.
+- name: 'ubuntu'
+  id: 'List Files'
+  entrypoint: 'bash'
+  args: ['-c', 'ls -laR']
+
 # Step 1: Build the Docker container image.
-# We change directory into 'my-todo-app/backend' to find the Dockerfile.
 - name: 'gcr.io/cloud-builders/docker'
-  dir: 'my-todo-app/backend' # <-- THIS IS THE ONLY LINE THAT NEEDED TO CHANGE
+  dir: 'my-todo-app/backend'
   args: ['build', '-t', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO_NAME}/${REPO_NAME}-backend:$COMMIT_SHA', '.']
 
 # Step 2: Push the container image to Google Artifact Registry.
@@ -14,7 +19,7 @@ steps:
   args:
   - 'run'
   - 'deploy'
-  - 'my-todo-backend-service' # Service name for the backend
+  - 'my-todo-backend-service'
   - '--image'
   - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO_NAME}/${REPO_NAME}-backend:$COMMIT_SHA'
   - '--region'

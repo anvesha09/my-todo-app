@@ -36,5 +36,5 @@ images:
 
 # User-defined substitutions for customization.
 substitutions:
-  _REGION: 'asia-south1' # <-- IMPORTANT: CHANGE THIS TO YOUR PREFERRED REGION!
-  _AR_REPO_NAME: 'my-apps' # This is the name for your image repository in GCP. 'my-apps' is a good default.
+  _REGION: 'asia-south1' # <-- Make sure this is your correct region!
+  _AR_REPO_NAME: 'my-apps'

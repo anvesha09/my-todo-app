@@ -39,7 +39,7 @@ substitutions:
   _REGION: 'asia-south1' # Make sure this is your correct region!
   _AR_REPO_NAME: 'my-apps'
 
-# <-- ADD THIS NEW SECTION
+# ADD THIS NEW SECTION
 # This option tells Cloud Build to send logs directly to Cloud Logging.
 options:
   logging: CLOUD_LOGGING_ONLY

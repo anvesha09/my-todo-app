@@ -1,39 +1,21 @@
-# Stage 1: Build the React application
-FROM node:18-alpine AS builder
+# Stage 1: Create the application image
+# Use an official Node.js image. Alpine images are lightweight.
+FROM node:18-alpine
 
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy package.json and package-lock.json
+# Copy package.json and package-lock.json to leverage Docker cache
 COPY package*.json ./
 
-# Install all project dependencies
+# Install project dependencies
 RUN npm install
 
 # Copy the rest of your application's source code
 COPY . .
 
-# Build the application for production
-RUN npm run build
+# Expose the port your application runs on (e.g., 8000)
+EXPOSE 8000
 
-
-# Stage 2: Serve the application
-FROM node:18-alpine
-
-# Set the working directory
-WORKDIR /app
-
-# Copy the built assets from the 'builder' stage
-COPY --from=builder /app/dist ./dist
-
-# Copy installed dependencies from the 'builder' stage
-COPY --from=builder /app/node_modules ./node_modules
-
-# Copy package.json, which contains the 'preview' script
-COPY --from=builder /app/package.json ./package.json
-
-# Expose the port that the Vite preview server runs on
-EXPOSE 4173
-
-# The command to start the Vite preview server
-CMD [ "npm", "run", "preview", "--", "--host" ]
+# The command to start your application
+CMD ["node", "index.js"]

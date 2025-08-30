@@ -69,36 +69,43 @@ app.get("/", (req, res) => {
   res.send("App is running");
 });
 
-// Use the port from the environment variable provided by Cloud Run, or default to 3001 for local development.
-const PORT = process.env.PORT || 3001; // <-- THIS IS THE CORRECTED LINE
+const PORT = process.env.PORT || 3001;
 
-// Database setup
-const setupDb = async (db) => {
-  try {
-    await db.query("CREATE DATABASE IF NOT EXISTS todo_app;");
-    await db.query("USE todo_app;");
-    await db.query(`
-      CREATE TABLE IF NOT EXISTS todos (
-        id INT PRIMARY KEY AUTO_INCREMENT,
-        description VARCHAR(255) NOT NULL
-      );
-    `);
-  } catch (error) {
-    console.error("Database setup error:", error);
-  }
-};
-
-// MySQL Connection
-mysql
-  .createConnection({
-    host: process.env.MYSQL_HOST || "localhost",
+// Function to create database connection
+const createDbConnection = () => {
+  const dbConfig = {
     user: process.env.MYSQL_USER || "root",
     password: process.env.MYSQL_PASSWORD || "password",
     database: process.env.MYSQL_DATABASE || "todo_app",
-  })
-  .then(async (_connection) => {
-    connection = _connection;
-    await setupDb(connection);
-    app.listen(PORT, () => console.log("Server is running on port", PORT));
-  })
-  .catch((err) => console.error("Database connection error:", err));
+  };
+
+  // If the CLOUD_SQL_CONNECTION_NAME variable is set, we're in a GCP environment
+  // and should use the Cloud SQL socket for a secure connection.
+  if (process.env.CLOUD_SQL_CONNECTION_NAME) {
+    dbConfig.socketPath = `/cloudsql/${process.env.CLOUD_SQL_CONNECTION_NAME}`;
+  } else {
+    // Otherwise, we're likely local, so use the standard host.
+    dbConfig.host = process.env.MYSQL_HOST || "localhost";
+  }
+  return mysql.createConnection(dbConfig);
+};
+
+
+// Main function to start the server
+const startServer = async () => {
+  try {
+    connection = await createDbConnection();
+    console.log("Database connection successful!");
+    
+    // The setupDb function is not needed in production, as the database and table
+    // should already exist. It can cause permission issues. We'll skip it for now.
+    // await setupDb(connection); 
+
+    app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+  } catch (err) {
+    console.error("Failed to start server:", err);
+    process.exit(1); // Exit if we can't connect to the DB
+  }
+};
+
+startServer();

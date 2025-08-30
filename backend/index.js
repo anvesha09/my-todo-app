@@ -69,7 +69,7 @@ app.get("/", (req, res) => {
   res.send("App is running");
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 // Database setup
 const setupDb = async (db) => {

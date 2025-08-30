@@ -1,0 +1,40 @@
+# This Cloud Build file is configured for your 'my-todo-app' repository.
+steps:
+# Step 1: Build the Docker container image.
+# It uses your repo name 'my-todo-app' for the image name automatically.
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+    - 'build'
+    - '-t'
+    - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO_NAME}/${REPO_NAME}:$COMMIT_SHA'
+    - '.'
+
+# Step 2: Push the container image to Google Artifact Registry.
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+    - 'push'
+    - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO_NAME}/${REPO_NAME}:$COMMIT_SHA'
+
+# Step 3: Deploy the new container image to Cloud Run.
+# The service is explicitly named 'my-todo-app-service'.
+- name: 'gcr.io/cloud-builders/gcloud'
+  args:
+    - 'run'
+    - 'deploy'
+    - 'my-todo-app-service' # Your service name is set here
+    - '--image'
+    - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO_NAME}/${REPO_NAME}:$COMMIT_SHA'
+    - '--region'
+    - '${_REGION}'
+    - '--platform'
+    - 'managed'
+    - '--allow-unauthenticated' # Makes your service publicly accessible
+
+# This section lists the created image for reference in the build logs.
+images:
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO_NAME}/${REPO_NAME}:$COMMIT_SHA'
+
+# User-defined substitutions for customization.
+substitutions:
+  _REGION: 'asia-south1' # <-- IMPORTANT: CHANGE THIS TO YOUR PREFERRED REGION!
+  _AR_REPO_NAME: 'my-apps' # This is the name for your image repository in GCP. 'my-apps' is a good default.

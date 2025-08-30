@@ -5,21 +5,22 @@ steps:
   entrypoint: 'bash'
   args: ['-c', 'ls -laR']
 
-# Step 1: Build the Docker container image.
+# Step 1: Build the Docker container image for the backend.
 - name: 'gcr.io/cloud-builders/docker'
-  dir: 'my-todo-app/backend'
+  # This tells Cloud Build to run the build from inside the 'backend' folder.
+  dir: 'backend' # <-- This is the corrected path.
   args: ['build', '-t', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO_NAME}/${REPO_NAME}-backend:$COMMIT_SHA', '.']
 
-# Step 2: Push the container image to Google Artifact Registry.
+# Step 2: Push the backend container image to Artifact Registry.
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO_NAME}/${REPO_NAME}-backend:$COMMIT_SHA']
 
-# Step 3: Deploy the new container image to Cloud Run.
+# Step 3: Deploy the backend image to Cloud Run.
 - name: 'gcr.io/cloud-builders/gcloud'
   args:
   - 'run'
   - 'deploy'
-  - 'my-todo-backend-service'
+  - 'my-todo-backend-service' # Service name for the backend
   - '--image'
   - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO_NAME}/${REPO_NAME}-backend:$COMMIT_SHA'
   - '--region'

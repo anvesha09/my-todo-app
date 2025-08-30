@@ -69,7 +69,8 @@ app.get("/", (req, res) => {
   res.send("App is running");
 });
 
-const PORT = process.env.PORT || 3001;
+// Use the port from the environment variable provided by Cloud Run, or default to 3001 for local development.
+const PORT = process.env.PORT || 3001; // <-- THIS IS THE CORRECTED LINE
 
 // Database setup
 const setupDb = async (db) => {
